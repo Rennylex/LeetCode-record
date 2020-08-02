@@ -1,0 +1,89 @@
+题目：你有 k 个升序排列的整数数组。找到一个最小区间，使得 k 个列表中的每个列表至少有一个数包含在其中。
+
+我们定义如果 b-a < d-c 或者在 b-a == d-c 时 a < c，则区间 [a,b] 比 [c,d] 小。
+
+示例 1:
+
+输入:[[4,10,15,24,26], [0,9,12,20], [5,18,22,30]]
+输出: [20,24]
+解释: 
+列表 1：[4, 10, 15, 24, 26]，24 在区间 [20,24] 中。
+列表 2：[0, 9, 12, 20]，20 在区间 [20,24] 中。
+列表 3：[5, 18, 22, 30]，22 在区间 [20,24] 中。
+注意:
+
+给定的列表可能包含重复元素，所以在这里升序表示 >= 。
+1 <= k <= 3500
+-105 <= 元素的值 <= 105
+对于使用Java的用户，请注意传入类型已修改为List<List<Integer>>。重置代码模板后可以看到这项改动。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/smallest-range-covering-elements-from-k-lists
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+解法：
+class Solution {
+public:
+//使用哈希表，表的索引：各个元素  内容：该元素分别在哪些表格中出现（可以重复）
+//滑动窗口，一个左指针一个右指针遍历哈希表。先右指针右移到第一个满足要求的元素，再移动左指针到不能满足要求为止
+//重复上述过程直至右指针移动到了最右边。
+    vector<int> smallestRange(vector<vector<int>>& nums) {
+    int n=nums.size();
+    unordered_map <int, vector<int>> Hashtable;
+    int i,xmin=INT_MAX, xmax=INT_MIN;//INT_MAX INT_MIN用法
+    for (i=0;i<n;i++)
+    {
+        for(const int& j:nums[i])//牢记此处遍历数组的方法，j直接代表nums[i]中的一个数了
+        {
+          Hashtable[j].push_back(i);
+          xmin=min(xmin,j);
+          xmax=max(xmax,j);
+        }
+    }
+    
+    int left=xmin,right=xmin,judge=0;//judge是判断是否所有表都出现的变量
+    int ansleft=xmin,ansright=xmax;
+    vector<int> freq(n);//记录出现了次满足要求的元素
+    while(right<=xmax)
+     {  
+       if(Hashtable.count(right))//如果Hashtable[rignt]非空
+       {
+         for(const int& x:Hashtable[right])
+           {
+               freq[x]++;
+               if(freq[x]==1)//仅当该表出现一次时对judge加一
+               {
+                   judge++;
+               }
+           }
+       }
+       
+       if(judge==n)//这段是移动左指针的
+        {  
+            while(judge==n)
+            { 
+              if((right-left)<(ansright-ansleft))
+              {
+                ansright=right; ansleft=left;
+              }
+              if(Hashtable.count(left))
+               { 
+                 for(const int& x: Hashtable[left])
+                 {
+                     freq[x]--;
+                     if(freq[x]==0)//仅当表格出现次数减少为0才对judge减一
+                       {judge--;}
+                 }
+                
+               }
+                
+            left++;
+            }
+        }
+        right++;
+
+
+     }
+   return {ansleft, ansright};
+  }
+};
