@@ -1,0 +1,41 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+
+ 在上次打劫完一条街道之后和一圈房屋后，小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。
+
+计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。
+
+ */
+class Solution {
+public:
+    unordered_map <TreeNode*, int> select, notselect;
+    void DFS(TreeNode* root)//用DFS依次遍历，每个节点有两个数据：选择它的最高分数和不选择他的最高分数。
+    {
+ // 底层节点：（size+1）/2
+ // 编号a的左儿子：2a,右儿子:2a+1;      
+    if(!root)
+     {
+      return ;
+     }
+    
+    
+    DFS(root->left);
+    DFS(root->right);
+
+    select[root]=root->val+notselect[root->left]+notselect[root->right];//DP转移方程1
+    notselect[root]=max(select[root->left],notselect[root->left])+max(select[root->right],notselect[root->right]);//DP转移方程2    
+    }
+
+    int rob(TreeNode* root) {
+ // 没用到这个知识点，但是复习一下二叉树知识：底层节点：（size+1）/2
+ //没用到这个知识点，但是复习一下： 编号a的左儿子：2a,右儿子:2a+1;      
+    DFS(root);
+    return max(notselect[root],select[root]);
+    }    
+};
